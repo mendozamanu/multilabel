@@ -16,8 +16,6 @@ if len(sys.argv) <= 1:
     print "multilabelKfold.py input-file [output-file-prefix]"
     sys.exit()
 
-k = 1
-
 # Read arff file
 dataset = arff.load(open(sys.argv[1], 'rb'))
 data = np.array(dataset['data'])

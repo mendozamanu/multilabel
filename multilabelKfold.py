@@ -4,14 +4,17 @@ import sys
 from skmultilearn.model_selection import IterativeStratification
 import numpy as np
 import arff
-
+from skmultilearn.model_selection.measures import folds_label_combination_pairs_without_evidence
+from skmultilearn.model_selection.measures import example_distribution
+from skmultilearn.model_selection.measures import label_combination_distribution
+from skmultilearn.model_selection.measures import folds_without_evidence_for_at_least_one_label_combination
 
 # Call
 if len(sys.argv) <= 2:
-    print "multilabelKfold.py input-file k [output-file-prefix]"
+    print "multilabelKfold.py input-file f [output-file-prefix]"
     sys.exit()
 
-k = int(sys.argv[2])
+f = int(sys.argv[2])
 
 # Read arff file
 dataset = arff.load(open(sys.argv[1], 'rb'))
@@ -52,7 +55,7 @@ else:
         aux +=1
 
 # Stratified k-fold partition
-kf = IterativeStratification(n_splits=k, order=1)
+kf = IterativeStratification(n_splits=f, order=1)
 
 #Split the data in X and Y
 if(int(number)>0):
@@ -114,12 +117,15 @@ sparse = False if sparse_size >= dense_size else True
 suffix = sys.argv[3] if len(sys.argv) == 4 else sys.argv[1][:sys.argv[1].rfind('.')]
 
 kfold = 0
+folds = []
+desired_number = []
 print ("Generating kfolds...")
 for train_index, test_index in kf.split(X,y):
     X_train, X_test = X[train_index], X[test_index]
     y_train, y_test = y[train_index], y[test_index]
     #Classes do not match
-    
+    folds.append(train_index)
+    desired_number.append((X.shape[0]*(k-1))/k)
     #Training file
 
     fp = open(suffix+str(kfold)+'.train', 'w')
@@ -202,3 +208,16 @@ for train_index, test_index in kf.split(X,y):
     fp.close()
 
     kfold += 1
+
+FLZ = folds_label_combination_pairs_without_evidence(y, folds, 1)
+FZ=folds_without_evidence_for_at_least_one_label_combination(y, folds, 1)
+LD = label_combination_distribution(y, folds, 1)
+ED = example_distribution(folds, desired_number)
+print("Label distribution: ")
+print(LD)
+print("Example distribution: ")
+print(ED)
+print("Number of fold-label pairs with 0 positive examples, FLZ: ")
+print(FLZ)
+print("Number of folds that contain at least 1 label with 0 positive examples, FZ: ")
+print(FZ)
