@@ -14,7 +14,7 @@ if len(sys.argv) <= 2:
     print "multilabelrandomKfold.py input-file f [output-file-prefix]"
     sys.exit()
 
-k = int(sys.argv[2]) 
+f = int(sys.argv[2]) 
 #Le pasamos como argumento el num de kfolds que queremos
 
 # Read arff file
@@ -126,7 +126,7 @@ for train_index, test_index in kf.split(X,y):
     y_train, y_test = y[train_index], y[test_index]
     #Classes do not match
     folds.append(train_index)
-    desired_number.append((X.shape[0]*(k-1))/k)
+    desired_number.append((X.shape[0]*(f-1))/f)
     #Training file
 
     fp = open(suffix+str(kfold)+'.rtrain', 'w')
@@ -210,15 +210,17 @@ for train_index, test_index in kf.split(X,y):
 
     kfold += 1
 
+fp = open(suffix+'.rmeasures', 'w')
 FLZ = folds_label_combination_pairs_without_evidence(y, folds, 1)
 FZ=folds_without_evidence_for_at_least_one_label_combination(y, folds, 1)
 LD = label_combination_distribution(y, folds, 1)
 ED = example_distribution(folds, desired_number)
-print("Label distribution: ")
-print(LD)
-print("Example distribution: ")
-print(ED)
-print("Number of fold-label pairs with 0 positive examples, FLZ: ")
-print(FLZ)
-print("Number of folds that contain at least 1 label with 0 positive examples, FZ: ")
-print(FZ)
+fp.write("Label distribution: ")
+fp.write(str(LD)+'\n')
+fp.write("Example distribution: ")
+fp.write(str(ED)+'\n')
+fp.write("Number of fold-label pairs with 0 positive examples, FLZ: ")
+fp.write(str(FLZ)+'\n')
+fp.write("Number of folds that contain at least 1 label with 0 positive examples, FZ: ")
+fp.write(str(FZ)+'\n')
+fp.close()
