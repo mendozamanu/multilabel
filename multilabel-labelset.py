@@ -36,12 +36,14 @@ def stratified_folds(n_splits, y):
 
 # Call
 if len(sys.argv) <= 2:
-    print "kfold-labelset.py input-file f [output-file-prefix]"
+    print "Correct use: multilabel-labelset.py input-file f [output-file-prefix]"
     sys.exit()
 
 f = int(sys.argv[2])
 
 # Read arff file
+if sys.argv[1].lower().endswith('.arff') == False :
+    sys.exit("Dataset format unknown, please use .arff datasets")
 dataset = arff.load(open(sys.argv[1], 'rb'))
 data = np.array(dataset['data'])
 
@@ -56,6 +58,10 @@ for i in line.split():
         break
     if (i == "-C") or (i == "-c"):
         flag = True
+
+if (flag==False):
+    file.close()
+    sys.exit("Wrong format for the dataset header")
 
 if number[-1:] == "'":
     number = number[:-1]
@@ -240,9 +246,9 @@ for test_index in kf:
     kfold += 1
 
 fp = open(suffix+'.lmeasures', 'w')
-FLZ = folds_label_combination_pairs_without_evidence(y, folds, 1)
-FZ=folds_without_evidence_for_at_least_one_label_combination(y, folds, 1)
-LD = label_combination_distribution(y, folds, 1)
+FLZ = folds_label_combination_pairs_without_evidence(y, folds, 1) 
+FZ = folds_without_evidence_for_at_least_one_label_combination(y, folds, 1)
+LD = label_combination_distribution(y, folds, 1) 
 ED = example_distribution(folds, desired_number)
 fp.write("Label distribution: ")
 fp.write(str(LD)+'\n')

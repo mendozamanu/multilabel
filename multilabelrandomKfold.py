@@ -11,13 +11,15 @@ from skmultilearn.model_selection.measures import folds_without_evidence_for_at_
 
 # Call
 if len(sys.argv) <= 2:
-    print "multilabelrandomKfold.py input-file f [output-file-prefix]"
+    print "Correct use: multilabelrandomKfold.py input-file f [output-file-prefix]"
     sys.exit()
 
 f = int(sys.argv[2]) 
 #Le pasamos como argumento el num de kfolds que queremos
 
 # Read arff file
+if sys.argv[1].lower().endswith('.arff') == False :
+    sys.exit("Dataset format unknown, please use .arff datasets")    
 dataset = arff.load(open(sys.argv[1], 'rb'))
 data = np.array(dataset['data'])
 
@@ -33,10 +35,15 @@ for i in line.split():
     if (i == "-C") or (i == "-c"):
         flag = True
 
+if (flag==False):
+    file.close()
+    sys.exit("Wrong format for the dataset header")
+
 if number[-1:] == "'":
     number = number[:-1]
 file.close()
 #Now we have the number stored, knowing that positive means the first attributes and negative the last ones
+
 
 nominalIndexArray = []
 nominals = []
@@ -212,7 +219,7 @@ for train_index, test_index in kf.split(X,y):
 
 fp = open(suffix+'.rmeasures', 'w')
 FLZ = folds_label_combination_pairs_without_evidence(y, folds, 1)
-FZ=folds_without_evidence_for_at_least_one_label_combination(y, folds, 1)
+FZ = folds_without_evidence_for_at_least_one_label_combination(y, folds, 1)
 LD = label_combination_distribution(y, folds, 1)
 ED = example_distribution(folds, desired_number)
 fp.write("Label distribution: ")
