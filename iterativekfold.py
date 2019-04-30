@@ -126,16 +126,19 @@ for s in dataset:
         rmi=sklearn.metrics.roc_auc_score(y_test, y_score.toarray(), average='micro', sample_weight=None, max_fpr=None)
         fold_auc.append(rmi)
 
-fp.write("Avg accuracy: ")
-fp.write(str(sum(fold_accuracy)/len(fold_accuracy))+'\n')
-fp.write("Hamming loss: ")
-fp.write(str(sum(fold_hamming)/len(fold_hamming))+'\n')
-fp.write("Mean average precision: ")
-fp.write(str(sum(fold_prec)/len(fold_prec))+'\n')
-fp.write("Micro-average AUC: ")
-fp.write(str(sum(fold_auc)/len(fold_auc))+'\n')
+    fp.write("Avg accuracy: ")
+    fp.write(str(sum(fold_accuracy)/len(fold_accuracy))+'\n')
+    fp.write("Hamming loss: ")
+    fp.write(str(sum(fold_hamming)/len(fold_hamming))+'\n')
+    fp.write("Mean average precision: ")
+    fp.write(str(sum(fold_prec)/len(fold_prec))+'\n')
+    fp.write("Micro-average AUC: ")
+    fp.write(str(sum(fold_auc)/len(fold_auc))+'\n')
+    fold_accuracy = []
+    fold_hamming = []
+    fold_prec = []
+    fold_auc = []
+    fp.close()
 
-
-fp.close()
     
 #print("Problems while trying to calculate coverage & ranking loss due to probab measure")
