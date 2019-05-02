@@ -6,6 +6,7 @@ from skmultilearn.problem_transform import BinaryRelevance
 from sklearn.ensemble import RandomForestClassifier
 import sklearn.metrics
 import datetime
+from sklearn.metrics import classification_report,confusion_matrix
 
 def readDataFromFile (fileName):
     "This functions reads data from a file and store it in two matrices"
@@ -83,7 +84,7 @@ def readDataFromFile (fileName):
 
 #Listado de datasets a ejecutar
 dataset = {
-   'delicious',
+   'Delicious',
    'bookmarks',
    'mediamill',
    'tmc2007'
@@ -139,6 +140,7 @@ for s in dataset:
     fold_hamming = []
     fold_prec = []
     fold_auc = []
+    fp.write(classification_report(y_test,y_score))
     fp.close()
     
 #print("Problems while trying to calculate coverage & ranking loss due to probab measure")
