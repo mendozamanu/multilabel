@@ -1,22 +1,20 @@
 #!/usr/bin/python2.7
+#Converts the .arff dataset into a clearer version to execute some measures like Card, dens and distinct.
 
 import sys
-from skmultilearn.model_selection import IterativeStratification
 import numpy as np
 import arff
-from skmultilearn.model_selection.measures import folds_label_combination_pairs_without_evidence
-from skmultilearn.model_selection.measures import example_distribution
-from skmultilearn.model_selection.measures import label_combination_distribution
-from skmultilearn.model_selection.measures import folds_without_evidence_for_at_least_one_label_combination
-from skmultilearn.model_selection import iterative_train_test_split
 
 
 # Call
 if len(sys.argv) <= 1:
-    print "multilabelKfold.py input-file [output-file-prefix]"
+    print "multilabel-convert.py input-file [output-file-prefix]"
     sys.exit()
 
 # Read arff file
+if sys.argv[1].lower().endswith('.arff') == False :
+    sys.exit("Dataset format unknown, please use .arff datasets")    
+
 dataset = arff.load(open(sys.argv[1], 'rb'))
 data = np.array(dataset['data'])
 
@@ -31,6 +29,10 @@ for i in line.split():
         break
     if (i == "-C") or (i == "-c"):
         flag = True
+
+if (flag==False):
+    file.close()
+    sys.exit("Wrong format for the dataset header")
 
 if number[-1:] == "'":
     number = number[:-1]
@@ -128,15 +130,29 @@ fp.write('$ %d\n' % abs(int(number))) #Number of labels
 
 #Data
 for i in range(0, len(X)):
-	
-	#fp.write('[ ')
+	if sparse:
+		for j in range(0, len(X[i])):
+			if(X[i][j] != '0.0'):
+				fp.write(str(j+1)+':'+str(X[i][j])+' ')
+			if(X[i][j] == 'YES'):
+				fp.write('1'+' ')		
+	else:
+		for j in range(0, len(X[i])):
+			if(X[i][j] == 'YES'):
+				fp.write('1'+' ')
+			elif (X[i][j] == 'NO'):
+				fp.write('0'+' ')
+			else:
+				fp.write(str(X[i][j])+' ')
+    
+	fp.write('[ ')
 	for j in range(0, len(y[i])):
 		if y[i][j] == '0.0':
 			aux = str(y[i][j]).split('.')[0]
 			fp.write(str(int(aux))+' ')
 		else:
 			fp.write(str(int(y[i][j]))+' ')
-	fp.write('\n')
+	fp.write(']\n')
 
 #Save header
 fp.close()
