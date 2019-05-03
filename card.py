@@ -1,4 +1,5 @@
 from collections import Counter
+import numpy as np
 def key(item):
     return item[1]
 def cardinality(df):
@@ -10,6 +11,13 @@ def cardinality(df):
     
     datafile=open(datafilename)
     l0=datafile.readline()
+    l0=l0.split()
+    sparse = l0[1]
+    if sparse[:-1] == 'SPARSE':
+        sparse = True #The file is in sparse mode
+    else:
+        sparse = False
+    
     l1=datafile.readline()
     l2=datafile.readline()
     l3=datafile.readline()
@@ -27,34 +35,45 @@ def cardinality(df):
 
     nwdfname="./datasets/"+df+"/"+df+".dsetm"
     fp=open(nwdfname, 'w')
+    fp.write("Instances: "+ str(instances)+'\n')
+    fp.write("Features: "+ str(features)+'\n')
+    fp.write("Labels: "+ str(labels)+'\n')
     while l4 != "":
         if(l4 == ' '):
             pass
-        else:  
-            label = map(int, l4.strip().split()[features+1:features+1+labels])
-            #To remove the '[' ']' from the labels extraction
-            dist.append(''.join(map(str, l4.strip().split()[features+1:features+1+labels])))
-            #print dist en dist tenemos todas las combinacs, luego hacemos el set
-            avg += sum(label)
-            #print avg
+        else:
+            if sparse == False:  
+                label = map(int, l4.strip().split()[features+1:features+1+labels])
+                #To remove the '[' ']' from the labels extraction
+                dist.append(''.join(map(str, l4.strip().split()[features+1:features+1+labels])))
+                #print dist en dist tenemos todas las combinacs, luego hacemos el set
+                avg += sum(label)
+                #print avg
+            else:
+                #Sparse . find '[' and start reading until ']'
+                label = map(int, l4.strip().split()[l4.strip().split().index('[')+1:l4.strip().split().index(']')])
+                dist.append(''.join(map(str,l4.strip().split()[l4.strip().split().index('[')+1:l4.strip().split().index(']')])))
+                avg += sum(label)
 
         l4=datafile.readline()
     
     fp.write("Labels frequency: \n")
-    lf=[]
+    
+    aux=np.zeros(shape=(labels, 2))
+    
     for i in range(0, labels):
-        aux= (sum(int(row[i]) for row in dist), i+1)
-        lf.append(list(aux))
-    #np.sum de la columna
-    lf.sort(reverse=True)
-    #print lf
-    for s in lf:
-        fp.write(str(s[1])+' '+str(s[0])+'\n')
+        aux [i] = (sum(int(row[i]) for row in dist), i+1)
+        
+        
+    aux = aux[(-aux[:,0]).argsort()]
+    
+    for s in aux:
+        fp.write(str(int(s[1]))+' '+str(int(s[0]))+'\n')
 
     countr=Counter(dist)
     fp.write ("Label combinations frequency: \n")
     for value, count in countr.most_common():
-    	fp.write(str(value)+' '+ str(count)+'\n')
+    	fp.write(str(int(value, 2))+' '+ str(count)+'\n')
     #print countr
     un_combs=set(dist)
     #print sorted(un_combs)
@@ -76,20 +95,21 @@ def cardinality(df):
 
 def main():
     dataset = {
-   'Delicious',
-   'bookmarks',
-   'mediamill',
+   #'delicious',
+   #'bookmarks',
+   #'mediamill',
    'tmc2007',
-   'bibtex',
-   'Corel5k',
-   'emotions',
-   'Enron',
-   'genbase',
-   'medical',
-   'scene',
-   'yeast'
-}
+   #'bibtex',
+   #'corel5k',
+   #'emotions',
+   #'enron',
+   #'genbase',
+   #'medical',
+   #'scene',
+   #'yeast'
+   }
     for ds in dataset:
+    	print "dataset:" + ds
         cardinality(ds)
   
 if __name__== "__main__":
