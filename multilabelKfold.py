@@ -149,18 +149,17 @@ for train_index, test_index in kf.split(X,y):
         if sparse:
             for j in range(0, len(X_train[i])):
                 if(X_train[i][j] != '0.0'):
-			if(X_train[i][j] == 'YES'):
-				fp.write('1'+' ')
-			else:
-                    		fp.write(str(j+1)+':'+str(X_train[i][j])+' ')
+                    fp.write(str(j+1)+':'+str(X_train[i][j])+' ')
+                if(X_train[i][j] == 'YES'):
+                    fp.write('1'+' ')
         else:
             for j in range(0, len(X_train[i])):
-		if(X_train[i][j] == 'YES'):
-			fp.write('1'+' ')
-		elif (X_train[i][j] == 'NO'):
-			fp.write('0'+' ')
-		else:
-                	fp.write(str(X_train[i][j])+' ')
+                if(X_train[i][j] == 'YES'):
+                    fp.write('1'+' ')
+                elif (X_train[i][j] == 'NO'):
+                    fp.write('0'+' ')
+                else:
+                    fp.write(str(X_train[i][j])+' ')
         
         fp.write('[ ')
         for j in range(0, len(y_train[i])):
@@ -189,18 +188,17 @@ for train_index, test_index in kf.split(X,y):
         if sparse:
             for j in range(0, len(X_test[i])):
                 if(X_test[i][j] != '0.0'):
-		    if(X_test[i][j] == 'YES'):
-			fp.write('1'+' ')
-		    else:
-                        fp.write(str(j+1)+':'+str(X_test[i][j])+' ')
+                    fp.write(str(j+1)+':'+str(X_test[i][j])+' ')
+                if(X_test[i][j] == 'YES'):
+                    fp.write('1'+' ')
         else:
             for j in range(0, len(X_test[i])):
                 if(X_test[i][j] == 'YES'):
-			fp.write('1'+' ')
-		elif (X_test[i][j] == 'NO'):
-			fp.write('0'+' ')
-		else:
-                	fp.write(str(X_test[i][j])+' ')
+			        fp.write('1'+' ')
+                elif (X_test[i][j] == 'NO'):
+                    fp.write('0'+' ')
+                else:
+                    fp.write(str(X_test[i][j])+' ')
         
         fp.write('[ ')
         for j in range(0, len(y_test[i])):

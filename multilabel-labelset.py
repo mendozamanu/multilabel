@@ -16,6 +16,7 @@ class Transfomer:
         self.reverse_combinations=[]
         self.last_id = 0
         train_vector = []
+        
         for labels_applied in y:
             label_string = ",".join(map(str, labels_applied))
 
@@ -156,6 +157,7 @@ kf = stratified_folds(f, y)
 print ("Generating kfolds...")
 for test_index in kf:
     train_index = [x for x in range(X.shape[0]) if x not in test_index]
+    
     X_train, X_test = X[train_index], X[test_index]
     y_train, y_test = y[train_index], y[test_index]
     
@@ -163,7 +165,7 @@ for test_index in kf:
     folds.append(train_index)
     desired_number.append((X.shape[0]*(f-1))/f)
     #Training file
-
+    
     fp = open(suffix+str(kfold)+'.ltrain', 'w')
     
     #Save header
@@ -180,19 +182,19 @@ for test_index in kf:
         if sparse:
             for j in range(0, len(X_train[i])):
                 if(X_train[i][j] != '0.0'):
-            		if(X_train[i][j] == 'YES'):
-                		fp.write('1'+' ')
-            else:
-                fp.write(str(j+1)+':'+str(X_train[i][j])+' ')
+                    fp.write(str(j+1)+':'+str(X_train[i][j])+' ')
+            	if(X_train[i][j] == 'YES'):
+                	fp.write('1'+' ')
+                    
         else:
             for j in range(0, len(X_train[i])):
-		if(X_train[i][j] == 'YES'):
-		    fp.write('1'+' ')
-		elif (X_train[i][j] == 'NO'):
-		    fp.write('0'+' ')
-		else:
-		    fp.write(str(X_train[i][j])+' ')
-        
+        		if(X_train[i][j] == 'YES'):
+        		    fp.write('1'+' ')
+        		elif (X_train[i][j] == 'NO'):
+        		    fp.write('0'+' ')
+        		else:
+        		    fp.write(str(X_train[i][j])+' ')
+                
         fp.write('[ ')
         for j in range(0, len(y_train[i])):
             if y_train[i][j] == '0.0':
@@ -220,10 +222,10 @@ for test_index in kf:
         if sparse:
             for j in range(0, len(X_test[i])):
                 if(X_test[i][j] != '0.0'):
-            		if(X_test[i][j] == 'YES'):
-            			fp.write('1'+' ')
-            	else:
-                        fp.write(str(j+1)+':'+str(X_test[i][j])+' ')
+                    fp.write(str(j+1)+':'+str(X_test[i][j])+' ')
+            	if(X_test[i][j] == 'YES'):
+            		fp.write('1'+' ')
+                        
         else:
             for j in range(0, len(X_test[i])):
                 if(X_test[i][j] == 'YES'):

@@ -8,6 +8,7 @@ from skmultilearn.model_selection.measures import folds_label_combination_pairs_
 from skmultilearn.model_selection.measures import example_distribution
 from skmultilearn.model_selection.measures import label_combination_distribution
 from skmultilearn.model_selection.measures import folds_without_evidence_for_at_least_one_label_combination
+from sklearn.covariance import EmpiricalCovariance
 
 # Call
 if len(sys.argv) <= 2:
@@ -127,6 +128,8 @@ suffix = sys.argv[3] if len(sys.argv) == 4 else sys.argv[1][:sys.argv[1].rfind('
 kfold = 0
 folds = []
 desired_number = []
+
+
 print ("Generating kfolds...")
 for train_index, test_index in kf.split(X,y):
     X_train, X_test = X[train_index], X[test_index]
@@ -152,18 +155,17 @@ for train_index, test_index in kf.split(X,y):
         if sparse:
             for j in range(0, len(X_train[i])):
                 if(X_train[i][j] != '0.0'):
-			if(X_train[i][j] == 'YES'):
-				fp.write('1'+' ')
-			else:
-                    		fp.write(str(j+1)+':'+str(X_train[i][j])+' ')
+                    fp.write(str(j+1)+':'+str(X_train[i][j])+' ')
+                if(X_train[i][j] == 'YES'):
+                    fp.write('1'+' ')
         else:
             for j in range(0, len(X_train[i])):
-		if(X_train[i][j] == 'YES'):
-			fp.write('1'+' ')
-		elif (X_train[i][j] == 'NO'):
-			fp.write('0'+' ')
-		else:
-                	fp.write(str(X_train[i][j])+' ')
+                if(X_train[i][j] == 'YES'):
+                    fp.write('1'+' ')
+                elif (X_train[i][j] == 'NO'):
+                    fp.write('0'+' ')
+                else:
+                    fp.write(str(X_train[i][j])+' ')
         
         fp.write('[ ')
         for j in range(0, len(y_train[i])):
@@ -192,18 +194,17 @@ for train_index, test_index in kf.split(X,y):
         if sparse:
             for j in range(0, len(X_test[i])):
                 if(X_test[i][j] != '0.0'):
-		    if(X_test[i][j] == 'YES'):
-			fp.write('1'+' ')
-		    else:
-                        fp.write(str(j+1)+':'+str(X_test[i][j])+' ')
+                    fp.write(str(j+1)+':'+str(X_test[i][j])+' ')
+                if(X_test[i][j] == 'YES'):
+                    fp.write('1'+' ')
         else:
             for j in range(0, len(X_test[i])):
                 if(X_test[i][j] == 'YES'):
-			fp.write('1'+' ')
-		elif (X_test[i][j] == 'NO'):
-			fp.write('0'+' ')
-		else:
-                	fp.write(str(X_test[i][j])+' ')
+                    fp.write('1'+' ')
+                elif (X_test[i][j] == 'NO'):
+                    fp.write('0'+' ')
+                else:
+                    fp.write(str(X_test[i][j])+' ')
         
         fp.write('[ ')
         for j in range(0, len(y_test[i])):
