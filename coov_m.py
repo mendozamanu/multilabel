@@ -2,7 +2,7 @@
 
 import sys
 import os
-from sklearn.model_selection import KFold
+
 import numpy as np
 import arff
 #from sklearn.covariance import EmpiricalCovariance
@@ -34,14 +34,14 @@ def label_correlation(y, s):
     return L
 
 dataset = {
-   #'delicious',
-   #'bookmarks',
-   #'mediamill',
-   #'tmc2007',
+   'Delicious',
+   'bookmarks',
+   'mediamill',
+   'tmc2007',
    'bibtex',
-   #'corel5k',
+   'Corel5k',
    'emotions',
-   'enron',
+   'Enron',
    'genbase',
    'medical',
    'scene',
