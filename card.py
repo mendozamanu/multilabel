@@ -57,6 +57,8 @@ def cardinality(df):
                 #Sparse . find '[' and start reading until ']'
                 label = map(int, l4.strip().split()[l4.strip().split().index('[')+1:l4.strip().split().index(']')])
                 dist.append(''.join(map(str,l4.strip().split()[l4.strip().split().index('[')+1:l4.strip().split().index(']')])))
+                tmp = sum(label)
+                insts[tmp] += 1
                 avg += sum(label)
 
         l4=datafile.readline()
@@ -98,19 +100,35 @@ def cardinality(df):
    
     datafile.close()
     fp.close()
+    
+    import matplotlib.pyplot as plt
+    #insts[] is the vector to plot
+    flbs = np.trim_zeros(insts, 'b')
+    objects=range(0, flbs.shape[0])
+    y_pos = np.arange(len(objects))
+    plt.figure(figsize=(15,8))
+    plt.bar(y_pos, flbs, align='center', alpha=0.5)
+    plt.xticks(y_pos, objects)
+    plt.ylabel('Frec of labels')
+    plt.xlabel('Num of active labels')
+    plt.title('Label frecuency')
+
+    plt.savefig('./datasets/'+df+'/'+'freclbs.png')
+    plt.close()
+
     #Division on python 2.7 returns int by default, 
     #in python3 it returns float so we have to "force" float div on python2.7
 
 def main():
     dataset = {
-   'delicious',
+   'Delicious',
    'bookmarks',
    'mediamill',
    'tmc2007',
    'bibtex',
-   'corel5k',
+   'Corel5k',
    'emotions',
-   'enron',
+   'Enron',
    'genbase',
    'medical',
    'scene',
@@ -121,4 +139,4 @@ def main():
         cardinality(ds)
   
 if __name__== "__main__":
-  main()
+    main()
