@@ -31,7 +31,9 @@ def cardinality(df):
     l4=datafile.readline()
 
     avg=0
+    tmp=0
     dist=[]
+    insts = np.zeros(labels,dtype=int)
 
     nwdfname="./datasets/"+df+"/"+df+".dsetm"
     fp=open(nwdfname, 'w')
@@ -47,6 +49,8 @@ def cardinality(df):
                 #To remove the '[' ']' from the labels extraction
                 dist.append(''.join(map(str, l4.strip().split()[features+1:features+1+labels])))
                 #print dist en dist tenemos todas las combinacs, luego hacemos el set
+                tmp = sum(label)
+                insts[tmp] += 1
                 avg += sum(label)
                 #print avg
             else:
@@ -56,6 +60,10 @@ def cardinality(df):
                 avg += sum(label)
 
         l4=datafile.readline()
+    
+    fp.write("Num of instances per label-count (0, 1, 2, ... nlabel)\n")
+    for i in range(0, insts.shape[0]):
+        fp.write(str(i) + ' ' + str(insts[i])+'\n')
     
     fp.write("Labels frequency: \n")
     
@@ -73,7 +81,7 @@ def cardinality(df):
     countr=Counter(dist)
     fp.write ("Label combinations frequency: \n")
     for value, count in countr.most_common():
-    	fp.write(str(int(value, 2))+' '+ str(count)+'\n')
+        fp.write(str(int(value, 2))+' '+ str(count)+'\n')
     #print countr
     un_combs=set(dist)
     #print sorted(un_combs)
@@ -95,21 +103,21 @@ def cardinality(df):
 
 def main():
     dataset = {
-   #'delicious',
-   #'bookmarks',
-   #'mediamill',
+   'delicious',
+   'bookmarks',
+   'mediamill',
    'tmc2007',
-   #'bibtex',
-   #'corel5k',
-   #'emotions',
-   #'enron',
-   #'genbase',
-   #'medical',
-   #'scene',
-   #'yeast'
+   'bibtex',
+   'corel5k',
+   'emotions',
+   'enron',
+   'genbase',
+   'medical',
+   'scene',
+   'yeast'
    }
     for ds in dataset:
-    	print "dataset:" + ds
+        print "dataset:" + ds
         cardinality(ds)
   
 if __name__== "__main__":
