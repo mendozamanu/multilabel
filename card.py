@@ -101,6 +101,8 @@ def cardinality(df):
     datafile.close()
     fp.close()
     
+    import matplotlib
+    matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     #insts[] is the vector to plot
     flbs = np.trim_zeros(insts, 'b')
@@ -113,7 +115,7 @@ def cardinality(df):
     plt.xlabel('Num of active labels')
     plt.title('Label frecuency')
 
-    plt.savefig('./datasets/'+df+'/'+'freclbs.png')
+    plt.savefig('./datasets/'+df+'/'+df+'freclbs.png')
     plt.close()
 
     #Division on python 2.7 returns int by default, 

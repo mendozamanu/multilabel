@@ -202,6 +202,8 @@ for s in dataset:
 
     cor= -np.sort(-cor)
 
+    import matplotlib
+    matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     labelscorrel=[len(l0), len(l1), len(l2), len(l3), len(l4), len(l5), len(l6), len(l7), len(l8), len(l9)] 
     objects=('0-0.1','0.1-0.2','0.2-0.3','0.3-0.4','0.4-0.5','0.5-0.6','0.6-0.7','0.7-0.8','0.8-0.9','0.9-1')
@@ -211,7 +213,7 @@ for s in dataset:
     plt.ylabel('Num of labels')
     plt.title('Correlation labels')
 
-    plt.savefig('./datasets/'+s+'/'+'corrlabls.png')
+    plt.savefig('./datasets/'+s+'/'+s+'corrlabls.png')
     plt.close()
 
     plt.plot(cor)
@@ -220,5 +222,5 @@ for s in dataset:
     #plt.set_xlim(0, cor.shape[0])
     plt.ylabel('Correlation')
     plt.title('Correlation ordered')
-    plt.savefig('./datasets/'+s+'/'+'corrordered.png')
+    plt.savefig('./datasets/'+s+'/'+s+'corrordered.png')
     plt.close()
