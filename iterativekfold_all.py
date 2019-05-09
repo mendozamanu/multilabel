@@ -87,18 +87,18 @@ def readDataFromFile (fileName):
 
 #Listado de datasets a ejecutar
 dataset = {
-   #'Delicious',
-   #'bookmarks',
-   #'mediamill',
-   #'tmc2007',
-   #'bibtex',
-   #'Corel5k',
-   #'emotions',
-   #'Enron',
-   #'genbase',
-   #'medical',
-   #'scene',
-   #'yeast'
+   'Delicious',
+   'bookmarks',
+   'mediamill',
+   'tmc2007',
+   'bibtex',
+   'Corel5k',
+   'emotions',
+   'Enron',
+   'genbase',
+   'medical',
+   'scene',
+   'yeast'
 }
 classifier = {
     BinaryRelevance(classifier=KNeighborsClassifier(n_neighbors=5),require_dense=[False,True]),
