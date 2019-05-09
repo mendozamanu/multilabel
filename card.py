@@ -108,7 +108,7 @@ def cardinality(df):
     flbs = np.trim_zeros(insts, 'b')
     objects=range(0, flbs.shape[0])
     y_pos = np.arange(len(objects))
-    #plt.figure(figsize=(15,9))
+    plt.figure(figsize=(15,9))
     plt.bar(y_pos, flbs, align='center', alpha=0.5)
     plt.xticks(y_pos, objects)
     plt.ylabel('Instances')
