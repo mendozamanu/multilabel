@@ -201,7 +201,7 @@ for s in dataset:
                 a+=1
 
     cor= -np.sort(-cor)
-
+    #print l0
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -210,17 +210,24 @@ for s in dataset:
     y_pos = np.arange(len(objects))
     plt.bar(y_pos, labelscorrel, align='center', alpha=0.5)
     plt.xticks(y_pos, objects)
-    plt.ylabel('Num of labels')
-    plt.title('Correlation labels')
+    plt.xlabel("Correlation interval")
+    plt.ylabel('Number of label pairs')
+    plt.title(s+': '+'Correlation between labels')
+    for i,j in zip(labelscorrel, y_pos):
+        plt.annotate(str(labelscorrel[j]), xy=(j, i+(np.max(labelscorrel)*0.01)), horizontalalignment='center')
 
     plt.savefig('./datasets/'+s+'/'+s+'corrlabls.png')
     plt.close()
 
     plt.plot(cor)
     plt.axis([0, cor.shape[0], 0, 1.1])
-    plt.xlabel('Labels')
+    plt.xlabel('Distinct label pairs')
     #plt.set_xlim(0, cor.shape[0])
     plt.ylabel('Correlation')
-    plt.title('Correlation ordered')
+    plt.title(s+': '+'Correlation distribution')
+
+    plt.annotate(str("{0:.3f}".format(cor[0])), xy=(0, cor[0]+0.02))
+    plt.annotate(str("{0:.3f}".format(cor[-1])), xy=((n*n)-n-2, cor[-1]+0.02))
+
     plt.savefig('./datasets/'+s+'/'+s+'corrordered.png')
     plt.close()

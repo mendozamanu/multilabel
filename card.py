@@ -108,12 +108,15 @@ def cardinality(df):
     flbs = np.trim_zeros(insts, 'b')
     objects=range(0, flbs.shape[0])
     y_pos = np.arange(len(objects))
-    plt.figure(figsize=(15,8))
+    #plt.figure(figsize=(15,9))
     plt.bar(y_pos, flbs, align='center', alpha=0.5)
     plt.xticks(y_pos, objects)
-    plt.ylabel('Frec of labels')
+    plt.ylabel('Instances')
     plt.xlabel('Num of active labels')
-    plt.title('Label frecuency')
+    plt.title(df+': '+'Label frecuency')
+
+    for i,j in zip(flbs, y_pos):
+        plt.annotate(str(flbs[j]), xy=(j,i+(np.max(flbs)*0.01)), horizontalalignment='center')
 
     plt.savefig('./datasets/'+df+'/'+df+'freclbs.png')
     plt.close()
@@ -135,7 +138,7 @@ def main():
    'medical',
    'scene',
    'yeast'
-   }
+}
     for ds in dataset:
         print "dataset:" + ds
         cardinality(ds)
