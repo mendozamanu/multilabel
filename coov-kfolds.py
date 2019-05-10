@@ -109,21 +109,6 @@ def label_correlation(y, s):
     
     return L
 
-dataset = {
-   'Delicious',
-   'bookmarks',
-   'mediamill',
-   'tmc2007',
-   'bibtex',
-   'Corel5k',
-   'emotions',
-   'Enron',
-   'genbase',
-   'medical',
-   'scene',
-   'yeast'
-}
-
 endfile = {
     'ltrain',
     'train',
@@ -135,103 +120,108 @@ endfile = {
 
 nfolds=10
 
-for s in dataset: #Para los difs datasets
-    print './datasets/'+s
-    if not os.path.exists("./plots/"+s):
-        os.makedirs("./plots/"+s)
-    for endfm in endfile: #Para recorrer todos los difs trains
-        for fld in range(0, nfolds): #Para recorrer los difs folds
-            name='./datasets/'+s+'/'+s+str(fld)+'.'+endfm
-            # Read arff file
-            
-            X, y=readDataFromFile(name)
+if len(sys.argv) <1:
+    print "coov-kfolds.py dataset"
+    sys.exit()
+s = str(sys.argv[1])
 
-            L=label_correlation(y.transpose(), 0.19)
-            #print L
 
-            fp=open(name+'.coov', 'w')
-            L.tofile(fp, sep=" ", format='%s')
-            fp.close()
-            #tri_lower_no_diag = np.tril(L, k=-1)
-            #print tri_lower_no_diag
-            tri_indx=L[np.tril_indices(L.shape[0], -1)]
-            #print tri_indx
+print './datasets/'+s
+if not os.path.exists("./plots/"+s):
+    os.makedirs("./plots/"+s)
+for endfm in endfile: #Para recorrer todos los difs trains
+    for fld in range(0, nfolds): #Para recorrer los difs folds
+        name='./datasets/'+s+'/'+s+str(fld)+'.'+endfm
+        # Read arff file
+        
+        X, y=readDataFromFile(name)
 
-            #listas para almac los indices de los intervalos
-            l0=[]
-            l1=[] 
-            l2=[] 
-            l3=[] 
-            l4=[] 
-            l5=[] 
-            l6=[] 
-            l7=[] 
-            l8=[] 
-            l9=[] 
-            #Contador para el vector de correlacs
-            a=0
+        L=label_correlation(y.transpose(), 0.19)
+        #print L
 
-            n=L.shape[0]
-            cor = np.zeros((n*n) - n)
+        fp=open(name+'.coov', 'w')
+        L.tofile(fp, sep=" ", format='%s')
+        fp.close()
+        #tri_lower_no_diag = np.tril(L, k=-1)
+        #print tri_lower_no_diag
+        tri_indx=L[np.tril_indices(L.shape[0], -1)]
+        #print tri_indx
 
-            #print cor.shape
+        #listas para almac los indices de los intervalos
+        l0=[]
+        l1=[] 
+        l2=[] 
+        l3=[] 
+        l4=[] 
+        l5=[] 
+        l6=[] 
+        l7=[] 
+        l8=[] 
+        l9=[] 
+        #Contador para el vector de correlacs
+        a=0
 
-            for i in range(0, L.shape[0]):
-                for j in range(L.shape[1]):
-                    if j!=i: #Cogemos todos los valores menos la diagonal ya que importa el orden (etq 1-2 no tiene misma correlac q etiq 2-1)
-                        if(L[i][j]<=0.1): #intervalo 0-0.1
-                            l0.append([i, j])
-                        if(L[i][j]>0.1 and L[i][j]<=0.2): #intervalo 0.1-0.2
-                            l1.append([i, j])
-                        if(L[i][j]>0.2 and L[i][j]<=0.3): #intervalo 0.2-0.3
-                            l2.append([i, j])
-                        if(L[i][j]>0.3 and L[i][j]<=0.4): #intervalo 0.3-0.4
-                            l3.append([i, j])
-                        if(L[i][j]>0.4 and L[i][j]<=0.5): #intervalo 0.4-0.5
-                            l4.append([i, j])
-                        if(L[i][j]>0.5 and L[i][j]<=0.6): #intervalo 0.5-0.6
-                            l5.append([i, j])
-                        if(L[i][j]>0.6 and L[i][j]<=0.7): #intervalo 0.6-0.7
-                            l6.append([i, j])
-                        if(L[i][j]>0.7 and L[i][j]<=0.8): #intervalo 0.7-0.8
-                            l7.append([i, j])
-                        if(L[i][j]>0.8 and L[i][j]<=0.9): #intervalo 0.8-0.9
-                            l8.append([i, j])
-                        if(L[i][j]>0.9 and L[i][j]<=1): #intervalo 0.9-1.0
-                            l9.append([i, j])
-                        
-                        cor[a]=L[i][j]
-                        a+=1
+        n=L.shape[0]
+        cor = np.zeros((n*n) - n)
 
-            cor= -np.sort(-cor)
-            #print l0
-            
-            import matplotlib
-            matplotlib.use('Agg')
-            import matplotlib.pyplot as plt
-            labelscorrel=[len(l0), len(l1), len(l2), len(l3), len(l4), len(l5), len(l6), len(l7), len(l8), len(l9)] 
-            objects=('0-0.1','0.1-0.2','0.2-0.3','0.3-0.4','0.4-0.5','0.5-0.6','0.6-0.7','0.7-0.8','0.8-0.9','0.9-1')
-            y_pos = np.arange(len(objects))
-            plt.bar(y_pos, labelscorrel, align='center', alpha=0.5)
-            plt.xticks(y_pos, objects)
-            plt.xlabel("Correlation interval")
-            plt.ylabel('Number of label pairs')
-            plt.title(s+': '+'Correlation between labels')
-            for i,j in zip(labelscorrel, y_pos):
-                plt.annotate(str(labelscorrel[j]), xy=(j, i+(np.max(labelscorrel)*0.01)), horizontalalignment='center')
+        #print cor.shape
 
-            plt.savefig('./plots/'+s+'/'+s+str(fld)+endfm+'corrlabls.png')
-            plt.close()
+        for i in range(0, L.shape[0]):
+            for j in range(L.shape[1]):
+                if j!=i: #Cogemos todos los valores menos la diagonal ya que importa el orden (etq 1-2 no tiene misma correlac q etiq 2-1)
+                    if(L[i][j]<=0.1): #intervalo 0-0.1
+                        l0.append([i, j])
+                    if(L[i][j]>0.1 and L[i][j]<=0.2): #intervalo 0.1-0.2
+                        l1.append([i, j])
+                    if(L[i][j]>0.2 and L[i][j]<=0.3): #intervalo 0.2-0.3
+                        l2.append([i, j])
+                    if(L[i][j]>0.3 and L[i][j]<=0.4): #intervalo 0.3-0.4
+                        l3.append([i, j])
+                    if(L[i][j]>0.4 and L[i][j]<=0.5): #intervalo 0.4-0.5
+                        l4.append([i, j])
+                    if(L[i][j]>0.5 and L[i][j]<=0.6): #intervalo 0.5-0.6
+                        l5.append([i, j])
+                    if(L[i][j]>0.6 and L[i][j]<=0.7): #intervalo 0.6-0.7
+                        l6.append([i, j])
+                    if(L[i][j]>0.7 and L[i][j]<=0.8): #intervalo 0.7-0.8
+                        l7.append([i, j])
+                    if(L[i][j]>0.8 and L[i][j]<=0.9): #intervalo 0.8-0.9
+                        l8.append([i, j])
+                    if(L[i][j]>0.9 and L[i][j]<=1): #intervalo 0.9-1.0
+                        l9.append([i, j])
+                    
+                    cor[a]=L[i][j]
+                    a+=1
 
-            plt.plot(cor)
-            plt.axis([0, cor.shape[0], 0, 1.1])
-            plt.xlabel('Distinct label pairs')
-            #plt.set_xlim(0, cor.shape[0])
-            plt.ylabel('Correlation')
-            plt.title(s+': '+'Correlation distribution')
+        cor= -np.sort(-cor)
+        #print l0
+        
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        labelscorrel=[len(l0), len(l1), len(l2), len(l3), len(l4), len(l5), len(l6), len(l7), len(l8), len(l9)] 
+        objects=('0-0.1','0.1-0.2','0.2-0.3','0.3-0.4','0.4-0.5','0.5-0.6','0.6-0.7','0.7-0.8','0.8-0.9','0.9-1')
+        y_pos = np.arange(len(objects))
+        plt.bar(y_pos, labelscorrel, align='center', alpha=0.5)
+        plt.xticks(y_pos, objects)
+        plt.xlabel("Correlation interval")
+        plt.ylabel('Number of label pairs')
+        plt.title(s+': '+'Correlation between labels')
+        for i,j in zip(labelscorrel, y_pos):
+            plt.annotate(str(labelscorrel[j]), xy=(j, i+(np.max(labelscorrel)*0.01)), horizontalalignment='center')
 
-            plt.annotate(str("{0:.3f}".format(cor[0])), xy=(0, cor[0]+0.02))
-            plt.annotate(str("{0:.3f}".format(cor[-1])), xy=((n*n)-n-2, cor[-1]+0.02))
+        plt.savefig('./plots/'+s+'/'+s+str(fld)+endfm+'corrlabls.png')
+        plt.close()
 
-            plt.savefig('./plots/'+s+'/'+s+str(fld)+endfm+'corrordered.png')
-            plt.close()
+        plt.plot(cor)
+        plt.axis([0, cor.shape[0], 0, 1.1])
+        plt.xlabel('Distinct label pairs')
+        #plt.set_xlim(0, cor.shape[0])
+        plt.ylabel('Correlation')
+        plt.title(s+': '+'Correlation distribution')
+
+        plt.annotate(str("{0:.3f}".format(cor[0])), xy=(0, cor[0]+0.02))
+        plt.annotate(str("{0:.3f}".format(cor[-1])), xy=((n*n)-n-2, cor[-1]+0.02))
+
+        plt.savefig('./plots/'+s+'/'+s+str(fld)+endfm+'corrordered.png')
+        plt.close()
