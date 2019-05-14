@@ -114,6 +114,7 @@ fold_aucm = []
 print('Reading: ./datasets/'+s+'/'+s+'.rtrain')
 print('Reading: ./datasets/'+s+'/'+s+'.rtest')     
 for cl in classifier:
+    print ('Classif: ' + str(cl).split('(')[0])
     fp = open(timeStamp('./datasets/'+s+'/'+s+str(cl).split('(')[0]), 'w')
     for i in range(0, nfolds):
         
