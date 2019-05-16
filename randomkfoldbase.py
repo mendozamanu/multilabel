@@ -7,6 +7,8 @@ from skmultilearn.problem_transform import BinaryRelevance
 from skmultilearn.problem_transform import LabelPowerset
 from skmultilearn.problem_transform import ClassifierChain
 from skmultilearn.adapt import MLkNN
+import functools
+import sklearn.metrics.base
 
 from sklearn.neighbors import KNeighborsClassifier
 import sklearn.metrics
@@ -87,6 +89,25 @@ def readDataFromFile (fileName):
     file.close()
     return X, y
 
+def average_precision_score(y_true, y_score, average="macro", pos_label=1,
+                            sample_weight=None):
+    def _binary_uninterpolated_average_precision(
+            y_true, y_score, pos_label=1, sample_weight=None):
+        precision, recall, _ = sklearn.metrics.precision_recall_curve(
+            y_true, y_score, pos_label=pos_label, sample_weight=sample_weight)
+
+        recall[np.isnan(recall)] = 0
+
+        return -np.sum(np.diff(recall) * np.array(precision)[:-1])
+
+    
+    average_precision = functools.partial(_binary_uninterpolated_average_precision,
+                                pos_label=pos_label)
+    
+    return sklearn.metrics.base._average_binary_score(average_precision, y_true, y_score,
+                                 average, sample_weight=sample_weight)
+
+
 if len(sys.argv) <= 1:
     print "Correct use: multilabelKfold.py input-file "
     sys.exit()
@@ -108,8 +129,13 @@ nfolds=10
 fold_accuracy = []
 fold_hamming = []
 fold_prec = []
+fold_precm = []
+
 fold_auc = []
-fold_aucm = []
+fold_cover = []
+fold_rank = []
+
+skip=0
 
 print('Reading: ./datasets/'+s+'/'+s+'.rtrain')
 print('Reading: ./datasets/'+s+'/'+s+'.rtest')     
@@ -118,14 +144,47 @@ for cl in classifier:
     fp = open(timeStamp('./datasets/'+s+'/'+s+str(cl).split('(')[0]), 'w')
     for i in range(0, nfolds):
         
+        skip=0
+        
         X_train,y_train=readDataFromFile('./datasets/'+s+'/'+s+str(i)+'.rtrain')
         X_test,y_test=readDataFromFile('./datasets/'+s+'/'+s+str(i)+'.rtest')
-        #Creo q estructurar fuera en otro bucle para todos los clasificadores, LP, CC, MLknn
         classif = cl
+        
+        for j in range(0, y_train.shape[1]):
+            if len(np.unique(y_train[:,j]))==1 : #Saltar fold si hay [0], luego div medidas por num real (nuevo contador)
+                skip=1
+        
+        #print (y_train.min(), y_train.max())
+        #Cuando en sklearn una entrada es y_score -> y_prob y si es y_test -> prediccion (y_score)
+        sys.stdout.flush()
+
         classif.fit(X_train,y_train)
         y_score = classif.predict(X_test)
 
-        #y_prob = classif.predict_proba(X_test)
+        if skip==0 :
+            y_prob = classif.predict_proba(X_test.todense())
+            #-----------------------------------------#
+            #Coverage\n",
+            c=sklearn.metrics.coverage_error(y_test, y_prob.toarray(), sample_weight=None)
+            fold_cover.append(c)
+            
+            #-----------------------------------------#
+            #Ranking loss\n",
+            rl=sklearn.metrics.label_ranking_loss(y_test, y_prob.toarray(), sample_weight=None)
+            fold_rank.append(rl)
+            #-----------------------------------------#
+            #Mean average precision
+            m=average_precision_score(y_test, y_prob.toarray(), average='macro', pos_label=1, sample_weight=None)
+            fold_prec.append(m)
+            
+            m2=average_precision_score(y_test, y_prob.toarray(), average='micro', pos_label=1, sample_weight=None)
+            fold_precm.append(m2)
+            
+            #-----------------------------------------#
+            #Micro-average AUC
+            rmi=sklearn.metrics.roc_auc_score(y_test, y_prob.toarray(), average='micro', sample_weight=None, max_fpr=None)
+            fold_auc.append(rmi)
+            
 
         #-----------------------------------------#
         #Medidas: sklearn.metrics...(true,predict,..)
@@ -134,29 +193,32 @@ for cl in classifier:
         #-----------------------------------------#
         hl=sklearn.metrics.hamming_loss(y_test, y_score)
         fold_hamming.append(hl)
-        #Mean average precision
-        m=sklearn.metrics.average_precision_score(y_test, y_score.toarray(), average='macro', pos_label=1, sample_weight=None)
-        fold_prec.append(m)
-        #-----------------------------------------#
-        #Micro&macro-average AUC
-        rmi=sklearn.metrics.roc_auc_score(y_test, y_score.toarray(), average='micro', sample_weight=None, max_fpr=None)
-        fold_auc.append(rmi)
-        #rma=sklearn.metrics.roc_auc_score(y_test, y_score.toarray(), average='macro', sample_weight=None, max_fpr=None)
-        #fold_aucm.append(rma)
+    
 
     fp.write("Avg accuracy: ")
     fp.write(str(sum(fold_accuracy)/len(fold_accuracy))+'\n')
     fp.write("Hamming loss: ")
     fp.write(str(sum(fold_hamming)/len(fold_hamming))+'\n')
-    fp.write("Mean average precision: ")
-    fp.write(str(sum(fold_prec)/len(fold_prec))+'\n')
+    
+    fp.write("Coverage: ")
+    if len(fold_cover)>0:
+        fp.write(str(sum(fold_cover)/len(fold_cover))+'\n')
+    
+    fp.write("Ranking loss: ")
+    if len(fold_rank)>0:
+        fp.write(str(sum(fold_rank)/len(fold_rank))+'\n')
+    
+    fp.write("Mean average precision (macro, micro): ")
+    if len(fold_prec)>0:
+        fp.write(str(sum(fold_prec)/len(fold_prec))+', ')
+        fp.write(str(sum(fold_precm)/len(fold_precm))+'\n')
+
     fp.write("Micro-average AUC: ")
-    fp.write(str(sum(fold_auc)/len(fold_auc))+'\n')
-    #fp.write("Macro-average AUC: ")
-    #fp.write(str(sum(fold_aucm)/len(fold_aucm))+'\n')
+    if len(fold_auc)>0:
+        fp.write(str(sum(fold_auc)/len(fold_auc))+'\n')
     fold_accuracy = []
     fold_hamming = []
     fold_prec = []
     fold_auc = []
-    fp.write(classification_report(y_test,y_score))
+    fp.write(classification_report(y_test, y_score, digits=20))
     fp.close()
