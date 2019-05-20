@@ -2,6 +2,9 @@
 
 import numpy as np
 import sys
+import os.path
+import uuid
+from pylocker import Locker
 import scipy.sparse as sp
 from skmultilearn.problem_transform import BinaryRelevance
 from skmultilearn.problem_transform import LabelPowerset
@@ -112,7 +115,12 @@ if len(sys.argv) <= 1:
     print "Correct use: multilabelKfold.py input-file "
     sys.exit()
 
+act=0
+
 s = str(sys.argv[1])
+if len(sys.argv)>2:
+    pr = str(sys.argv[2])
+    act=1
 
 classifier = {
     BinaryRelevance(classifier=KNeighborsClassifier(n_neighbors=5),require_dense=[False,True]),
@@ -120,10 +128,6 @@ classifier = {
     ClassifierChain(classifier=KNeighborsClassifier(n_neighbors=5),require_dense=[False,True]),
     MLkNN(k=5)
 }
-
-def timeStamp(fn, fmt='{fname}_%Y-%m-%d-%H-%M-%S.rclassif'):
-    return datetime.datetime.now().strftime(fmt).format(fname=fn)
-
 
 nfolds=10
 fold_accuracy = []
@@ -141,7 +145,18 @@ print('Reading: ./datasets/'+s+'/'+s+'.rtrain')
 print('Reading: ./datasets/'+s+'/'+s+'.rtest')     
 for cl in classifier:
     print ('Classif: ' + str(cl).split('(')[0])
-    fp = open(timeStamp('./datasets/'+s+'/'+s+str(cl).split('(')[0]), 'w')
+    
+    if not os.path.exists("./csv/"):
+        os.makedirs("./csv/")
+    if act==1:
+        fname='./csv/'+str(cl).split('(')[0]+'-'+str(pr)+'_random.csv'
+    else:
+        fname='./csv/'+str(cl).split('(')[0]+'_random.csv'
+    if not os.path.isfile(fname):    
+        fp=open(fname, 'a')
+        fp.write('Dataset;Accuracy;Hamming Loss;Coverage;Ranking loss;Avg precision macro;Avg precision micro;ROC AUC;f1 score (micro);Recall (micro);f1 score (macro);Recall (macro)'+'\n')
+        fp.close()
+    
     for i in range(0, nfolds):
         
         skip=0
@@ -194,31 +209,50 @@ for cl in classifier:
         hl=sklearn.metrics.hamming_loss(y_test, y_score)
         fold_hamming.append(hl)
     
+    lpass = str(uuid.uuid1())
+    FL = Locker(filePath=fname, lockPass=lpass, mode='a')
+    
+    with FL as r:
+        acquired, code, fd = r
 
-    fp.write("Avg accuracy: ")
-    fp.write(str(sum(fold_accuracy)/len(fold_accuracy))+'\n')
-    fp.write("Hamming loss: ")
-    fp.write(str(sum(fold_hamming)/len(fold_hamming))+'\n')
-    
-    fp.write("Coverage: ")
-    if len(fold_cover)>0:
-        fp.write(str(sum(fold_cover)/len(fold_cover))+'\n')
-    
-    fp.write("Ranking loss: ")
-    if len(fold_rank)>0:
-        fp.write(str(sum(fold_rank)/len(fold_rank))+'\n')
-    
-    fp.write("Mean average precision (macro, micro): ")
-    if len(fold_prec)>0:
-        fp.write(str(sum(fold_prec)/len(fold_prec))+', ')
-        fp.write(str(sum(fold_precm)/len(fold_precm))+'\n')
+        if fd is not None:
+            fd.write(str(s)+';')
+            #fp.write("Accuracy: ")
+            fd.write(str(sum(fold_accuracy)/len(fold_accuracy))+';')
+            #fp.write("Hamming loss: ")
+            fd.write(str(sum(fold_hamming)/len(fold_hamming))+';')
 
-    fp.write("Micro-average AUC: ")
-    if len(fold_auc)>0:
-        fp.write(str(sum(fold_auc)/len(fold_auc))+'\n')
+            #fp.write("Coverage: ")
+            if len(fold_cover)>0:
+                fd.write(str(sum(fold_cover)/len(fold_cover))+';')
+
+            #fp.write("Ranking loss: ")
+            if len(fold_rank)>0:
+                fd.write(str(sum(fold_rank)/len(fold_rank))+';')
+
+            #fp.write("Mean average precision (macro, micro): ")
+            if len(fold_prec)>0:
+                fd.write(str(sum(fold_prec)/len(fold_prec))+';')
+                fd.write(str(sum(fold_precm)/len(fold_precm))+';')
+
+            #fp.write("Micro-average AUC: ")
+            if len(fold_auc)>0:
+                fd.write(str(sum(fold_auc)/len(fold_auc))+';')
+
+            d = classification_report(y_test,y_score, digits=20, output_dict=True)
+            #es un dict de dicts -> en micro avg -> recall y f1-score
+                     #       -> en macro avg -> recall y f1-score
+            for kv in d.items():
+                if kv[0] == 'micro avg':
+                    fd.write(str(kv[1].get('f1-score'))+';')
+                    fd.write(str(kv[1].get('recall'))+';')
+                if kv[0] == 'macro avg':
+                    fd.write(str(kv[1].get('f1-score'))+';')
+                    fd.write(str(kv[1].get('recall'))+';')
+            fd.write('\n')
+
     fold_accuracy = []
     fold_hamming = []
     fold_prec = []
     fold_auc = []
-    fp.write(classification_report(y_test, y_score, digits=20))
-    fp.close()
+    
